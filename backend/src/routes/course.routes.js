@@ -2,7 +2,7 @@
 
 const express = require('express');
 const {
-  getCourses, getCourseBySlug, getLectureStream, createCourse, updateCourse,
+  getCourses, getCourseBySlug, getCourseById, getLectureStream, createCourse, updateCourse,
   deleteCourse, getInstructorCourses, getEnrolledStudents, addLecture, updateLecture, deleteLecture,
 } = require('../controllers/course.controller');
 const { authenticate, authorize } = require('../middleware/auth.middleware');
@@ -14,6 +14,7 @@ router.get('/', getCourses);
 router.get('/slug/:slug', getCourseBySlug);
 
 // Authenticated routes
+router.get('/:id', authenticate, getCourseById);
 router.get('/:id/lectures/:lectureId/stream', authenticate, getLectureStream);
 
 // Instructor routes

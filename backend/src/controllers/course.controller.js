@@ -65,6 +65,34 @@ const getCourseBySlug = asyncHandler(async (req, res) => {
 });
 
 /**
+ * GET /api/v1/courses/:id
+ * Get single course by ID (accessible for editing and details verification)
+ */
+const getCourseById = asyncHandler(async (req, res) => {
+  const course = await Course.findById(req.params.id)
+    .populate('instructor', 'name photoURL bio');
+
+  if (!course) {
+    return ApiResponse.error(res, 'Course not found', 404);
+  }
+
+  // If course is not published, only instructor or admin can view it
+  if (!course.isPublished) {
+    if (!req.user) {
+      return ApiResponse.error(res, 'Not authorized', 401);
+    }
+    const isInstructor = course.instructor && course.instructor._id.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+    if (!isInstructor && !isAdmin) {
+      return ApiResponse.error(res, 'Not authorized to view this unpublished course', 403);
+    }
+  }
+
+  ApiResponse.success(res, course, 'Course details');
+});
+
+
+/**
  * GET /api/v1/courses/:id/lectures/:lectureId/stream
  * Get signed S3 URL for video streaming (enrolled students only)
  */
@@ -238,6 +266,7 @@ const deleteLecture = asyncHandler(async (req, res) => {
 module.exports = {
   getCourses,
   getCourseBySlug,
+  getCourseById,
   getLectureStream,
   createCourse,
   updateCourse,
