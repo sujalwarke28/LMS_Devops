@@ -14,7 +14,7 @@ terraform {
 
   # Remote state in S3 (configure before first apply)
   backend "s3" {
-    bucket         = "lms-terraform-state"
+    bucket         = "lms-terraform-state-316749727294"
     key            = "prod/terraform.tfstate"
     region         = "ap-south-1"
     encrypt        = true

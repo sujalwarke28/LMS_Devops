@@ -132,7 +132,7 @@ pipeline {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
                     sh """
-                        aws eks update-kubeconfig --region ${AWS_REGION} --name lms-eks-cluster
+                        aws eks update-kubeconfig --region ${AWS_REGION} --name lms-eks-cluster-prod
                         kubectl apply -f k8s/namespace.yaml
                         kubectl apply -f k8s/backend/ -n ${KUBE_NAMESPACE}
                         kubectl apply -f k8s/frontend/ -n ${KUBE_NAMESPACE}

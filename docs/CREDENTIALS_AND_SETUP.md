@@ -152,7 +152,7 @@ Go to Manage Jenkins -> Credentials inside your Jenkins instance and add:
 ### Step 1: Connect kubectl to AWS EKS
 Configure your local command line to interface with the EKS cluster:
 ```bash
-aws eks update-kubeconfig --name lms-eks-cluster-dev --region ap-south-1
+aws eks update-kubeconfig --name lms-eks-cluster-prod --region ap-south-1
 ```
 Verify cluster nodes:
 ```bash

@@ -79,6 +79,9 @@ variable "eks_node_role_arn" { type = string }
 
 # ─── Outputs ──────────────────────────────────────────────
 output "app_access_key_id"     { value = aws_iam_access_key.lms_app.id }
-output "app_secret_access_key" { value = aws_iam_access_key.lms_app.secret; sensitive = true }
+output "app_secret_access_key" {
+  value     = aws_iam_access_key.lms_app.secret
+  sensitive = true
+}
 output "ecr_backend_url"       { value = aws_ecr_repository.backend.repository_url }
 output "ecr_frontend_url"      { value = aws_ecr_repository.frontend.repository_url }
