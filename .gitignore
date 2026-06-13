@@ -54,3 +54,7 @@ coverage/
 
 # Firebase
 firebase-adminsdk*.json
+
+# Credentials / Keys
+*.csv
+keys.txt
