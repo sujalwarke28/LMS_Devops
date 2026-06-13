@@ -109,6 +109,7 @@ pipeline {
                 anyOf {
                     branch 'main'
                     branch 'develop'
+                    expression { env.GIT_BRANCH?.contains('main') || env.GIT_BRANCH?.contains('develop') }
                 }
             }
             steps {
@@ -128,7 +129,10 @@ pipeline {
         // ── 6. Deploy to Kubernetes ──────────────────────────────
         stage('Deploy to EKS') {
             when {
-                branch 'main'
+                anyOf {
+                    branch 'main'
+                    expression { env.GIT_BRANCH?.contains('main') }
+                }
             }
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
@@ -150,7 +154,10 @@ pipeline {
         // ── 7. Smoke Test ────────────────────────────────────────
         stage('Smoke Test') {
             when {
-                branch 'main'
+                anyOf {
+                    branch 'main'
+                    expression { env.GIT_BRANCH?.contains('main') }
+                }
             }
             steps {
                 sh '''
