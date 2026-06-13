@@ -111,7 +111,7 @@ const getLectureStream = asyncHandler(async (req, res) => {
     const enrolled = await Enrollment.findOne({
       student: req.user._id,
       course: course._id,
-      status: 'active',
+      status: { $in: ['active', 'completed'] },
     });
     if (!enrolled) {
       return ApiResponse.error(res, 'You are not enrolled in this course', 403);
