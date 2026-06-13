@@ -21,10 +21,6 @@ export default function LearnCourse() {
       progressService.get(courseId),
       quizService.getByCourse(courseId),
     ]).catch(() => {}).finally(() => setLoading(false));
-
-    // Fetch course details for learning view (using id)
-    fetch(`/api/v1/courses/${courseId}`)
-      .catch(() => {});
   }, [courseId]);
 
   useEffect(() => {
