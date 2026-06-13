@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { GraduationCap, Chrome } from 'lucide-react';
+import { GraduationCap } from 'lucide-react';
 
 const ROLE_HOME = { student: '/student/dashboard', instructor: '/instructor/dashboard', admin: '/admin/dashboard' };
 
