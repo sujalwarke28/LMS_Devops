@@ -10,7 +10,7 @@ const upload = multer({
   limits: { fileSize: 500 * 1024 * 1024 }, // 500MB max
   fileFilter: (req, file, cb) => {
     const allowed = [
-      'video/mp4', 'video/webm', 'video/ogg',
+      'video/mp4', 'video/webm', 'video/ogg', 'video/quicktime',
       'application/pdf', 'image/jpeg', 'image/png', 'image/webp',
       'application/zip', 'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -27,6 +27,7 @@ const FOLDER_MAP = {
   'video/mp4': 'videos',
   'video/webm': 'videos',
   'video/ogg': 'videos',
+  'video/quicktime': 'videos',
   'application/pdf': 'resources',
   'image/jpeg': 'thumbnails',
   'image/png': 'thumbnails',
