@@ -10,6 +10,7 @@ pipeline {
         KUBE_NAMESPACE      = 'lms'
         IMAGE_TAG           = "${GIT_COMMIT[0..7]}"
         SLACK_CHANNEL       = '#devops-alerts'
+        PATH                = "/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
     }
 
     options {
