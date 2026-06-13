@@ -9,12 +9,17 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Attach Firebase ID token to every request
+// Attach JWT or Firebase ID token to every request
 api.interceptors.request.use(async (config) => {
-  const user = auth.currentUser;
-  if (user) {
-    const token = await user.getIdToken();
-    config.headers.Authorization = `Bearer ${token}`;
+  const localToken = localStorage.getItem('lms_jwt_token');
+  if (localToken) {
+    config.headers.Authorization = `Bearer ${localToken}`;
+  } else {
+    const user = auth.currentUser;
+    if (user) {
+      const token = await user.getIdToken();
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 }, (error) => Promise.reject(error));
@@ -25,6 +30,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       auth.signOut();
+      localStorage.removeItem('lms_jwt_token');
       window.location.href = '/login';
     }
     return Promise.reject(error);

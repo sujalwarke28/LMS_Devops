@@ -3,12 +3,13 @@
 const { admin, initializeFirebase } = require('../config/firebase');
 const User = require('../models/User');
 const logger = require('../utils/logger');
+const jwt = require('jsonwebtoken');
 
 // Ensure Firebase is initialized
 initializeFirebase();
 
 /**
- * Verify Firebase ID token and attach user to req.user
+ * Verify custom JWT or Firebase ID token and attach user to req.user
  */
 const authenticate = async (req, res, next) => {
   try {
@@ -21,10 +22,32 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    const idToken = authHeader.split('Bearer ')[1];
+    const token = authHeader.split('Bearer ')[1];
 
-    // Verify token with Firebase
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    // 1. Try Custom JWT authentication first
+    try {
+      const decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET || 'super_secret_lms_devops_key_123456789_long_enough'
+      );
+      const user = await User.findById(decoded.id);
+      
+      if (user) {
+        if (!user.isActive) {
+          return res.status(403).json({
+            success: false,
+            message: 'Your account has been deactivated. Contact support.',
+          });
+        }
+        req.user = user;
+        return next();
+      }
+    } catch (jwtErr) {
+      // Token is either not a custom JWT or it expired/is invalid. Proceed to Firebase auth.
+    }
+
+    // 2. Try Firebase ID Token authentication
+    const decodedToken = await admin.auth().verifyIdToken(token);
 
     // Find or create user in MongoDB
     let user = await User.findOne({ firebaseUid: decodedToken.uid });

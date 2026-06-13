@@ -1,13 +1,14 @@
 'use strict';
 
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema(
   {
     firebaseUid: {
       type: String,
-      required: true,
       unique: true,
+      sparse: true,
       index: true,
     },
     name: {
@@ -57,6 +58,10 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    password: {
+      type: String,
+      select: false,
+    },
   },
   {
     timestamps: true,
@@ -64,6 +69,24 @@ const userSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+// Hash password pre-save
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password') || !this.password) return next();
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Compare password method
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  if (!this.password) return false;
+  return bcrypt.compare(candidatePassword, this.password);
+};
 
 userSchema.virtual('id').get(function () {
   return this._id.toHexString();

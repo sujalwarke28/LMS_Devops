@@ -132,4 +132,77 @@ describe('Auth Endpoints', () => {
       expect(res.body.data.bio).toBe('I am learning DevOps');
     });
   });
+
+  describe('POST /api/v1/auth/login', () => {
+    it('should successfully log in custom email user and return JWT', async () => {
+      await User.create({
+        firebaseUid: 'custom-jwt-test',
+        email: 'sujal@stu.com',
+        name: 'Sujal Student',
+        role: 'student',
+        password: '1234',
+      });
+
+      const res = await request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: 'sujal@stu.com',
+          password: '1234',
+        });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.token).toBeDefined();
+      expect(res.body.data.user.email).toBe('sujal@stu.com');
+    });
+
+    it('should block login with wrong password', async () => {
+      await User.create({
+        firebaseUid: 'custom-jwt-test-fail',
+        email: 'sujal@stu.com',
+        name: 'Sujal Student',
+        role: 'student',
+        password: '1234',
+      });
+
+      const res = await request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: 'sujal@stu.com',
+          password: 'wrongpassword',
+        });
+
+      expect(res.statusCode).toBe(401);
+      expect(res.body.success).toBe(false);
+    });
+  });
+
+  describe('JWT Authenticated Requests', () => {
+    it('should authenticate requests using custom JWT token', async () => {
+      await User.create({
+        firebaseUid: 'custom-jwt-verify-test',
+        email: 'sujal@stu.com',
+        name: 'Sujal Student',
+        role: 'student',
+        password: '1234',
+      });
+
+      const loginRes = await request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: 'sujal@stu.com',
+          password: '1234',
+        });
+
+      const token = loginRes.body.data.token;
+
+      const res = await request(app)
+        .get('/api/v1/auth/me')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.email).toBe('sujal@stu.com');
+    });
+  });
 });

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { GraduationCap } from 'lucide-react';
@@ -6,11 +6,27 @@ import { GraduationCap } from 'lucide-react';
 const ROLE_HOME = { student: '/student/dashboard', instructor: '/instructor/dashboard', admin: '/admin/dashboard' };
 
 export default function LoginPage() {
-  const { user, loading, loginWithGoogle } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const { user, loading, loginWithGoogle, loginWithEmail } = useAuth();
 
   if (!loading && user) {
     return <Navigate to={ROLE_HOME[user.role] || '/courses'} replace />;
   }
+
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await loginWithEmail(email, password);
+    } catch (err) {
+      // toast notification is already managed by AuthContext
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="login-page">
@@ -53,11 +69,56 @@ export default function LoginPage() {
             <p className="login-sub">Sign in to access your learning dashboard</p>
           </div>
 
+          <form onSubmit={handleEmailLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+            <div className="form-group">
+              <label className="form-label" style={{ color: 'var(--clr-text-dim)' }}>Email Address</label>
+              <input
+                type="email"
+                className="form-input"
+                placeholder="sujal@stu.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={loading || submitting}
+                style={{ width: '100%' }}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label" style={{ color: 'var(--clr-text-dim)' }}>Password</label>
+              <input
+                type="password"
+                className="form-input"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading || submitting}
+                style={{ width: '100%' }}
+              />
+            </div>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              style={{ width: '100%', marginTop: '0.5rem' }}
+              disabled={loading || submitting}
+            >
+              {submitting ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
+
+          <div style={{ display: 'flex', alignItems: 'center', margin: '0.5rem 0', width: '100%' }}>
+            <hr style={{ flex: 1, borderColor: 'rgba(255,255,255,0.05)' }} />
+            <span style={{ padding: '0 0.75rem', fontSize: '0.75rem', color: 'var(--clr-text-dim)' }}>OR</span>
+            <hr style={{ flex: 1, borderColor: 'rgba(255,255,255,0.05)' }} />
+          </div>
+
           <button
             className="google-btn"
             onClick={loginWithGoogle}
-            disabled={loading}
+            disabled={loading || submitting}
             id="google-signin-btn"
+            type="button"
+            style={{ width: '100%' }}
           >
             <svg className="google-icon" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -65,7 +126,7 @@ export default function LoginPage() {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            {loading ? 'Signing in...' : 'Continue with Google'}
+            Continue with Google
           </button>
 
           <p style={{ fontSize: '0.78rem', color: 'var(--clr-text-dim)', textAlign: 'center', lineHeight: 1.5 }}>

@@ -12,29 +12,56 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-      setFirebaseUser(fbUser);
-      if (fbUser) {
+    const checkAuth = async () => {
+      const localToken = localStorage.getItem('lms_jwt_token');
+      if (localToken) {
         try {
           const { data } = await authService.getMe();
           setUser(data.data);
+          setLoading(false);
+          return;
         } catch (err) {
-          console.error('Failed to fetch user profile', err);
+          console.error('JWT verification failed, clearing token', err);
+          localStorage.removeItem('lms_jwt_token');
+        }
+      }
+
+      // If no custom token or if it failed, listen to Firebase Auth changes
+      const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+        setFirebaseUser(fbUser);
+        if (fbUser) {
+          try {
+            const { data } = await authService.getMe();
+            setUser(data.data);
+          } catch (err) {
+            console.error('Failed to fetch Firebase user profile', err);
+            setUser(null);
+          }
+        } else {
           setUser(null);
         }
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
+        setLoading(false);
+      });
+
+      return unsubscribe;
+    };
+
+    let unsubscribeFirebase;
+    checkAuth().then((unsub) => {
+      if (unsub) unsubscribeFirebase = unsub;
     });
-    return () => unsubscribe();
+
+    return () => {
+      if (unsubscribeFirebase) unsubscribeFirebase();
+    };
   }, []);
 
   const loginWithGoogle = async () => {
     try {
       setLoading(true);
+      // Clear local JWT token if any to avoid headers conflict
+      localStorage.removeItem('lms_jwt_token');
       await signInWithPopup(auth, googleProvider);
-      // onAuthStateChanged will handle the rest
     } catch (err) {
       toast.error('Google sign-in failed. Please try again.');
       console.error(err);
@@ -42,9 +69,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithEmail = async (email, password) => {
+    try {
+      setLoading(true);
+      const { data } = await authService.login(email, password);
+      localStorage.setItem('lms_jwt_token', data.data.token);
+      setUser(data.data.user);
+      toast.success('Logged in successfully');
+      return data.data.user;
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Login failed. Please check credentials.';
+      toast.error(msg);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     try {
       await signOut(auth);
+      localStorage.removeItem('lms_jwt_token');
       setUser(null);
       setFirebaseUser(null);
       toast.success('Signed out successfully');
@@ -63,7 +108,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, loginWithGoogle, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, firebaseUser, loading, loginWithGoogle, loginWithEmail, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
