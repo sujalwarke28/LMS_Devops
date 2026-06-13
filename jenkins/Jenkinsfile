@@ -67,7 +67,7 @@ pipeline {
                 stage('Build Backend Image') {
                     steps {
                         sh """
-                            docker build \
+                            docker build --platform linux/amd64 \
                               -t ${BACKEND_IMAGE}:${IMAGE_TAG} \
                               -t ${BACKEND_IMAGE}:latest \
                               ./backend
@@ -85,7 +85,7 @@ pipeline {
                             string(credentialsId: 'vite-firebase-app-id', variable: 'VITE_FIREBASE_APP_ID'),
                         ]) {
                             sh """
-                                docker build \
+                                docker build --platform linux/amd64 \
                                   --build-arg VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY} \
                                   --build-arg VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN} \
                                   --build-arg VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID} \
@@ -138,6 +138,10 @@ pipeline {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
                     sh """
                         aws eks update-kubeconfig --region ${AWS_REGION} --name lms-eks-cluster-prod
+                        
+                        # Replace <AWS_ACCOUNT_ID> placeholder in deployment manifests
+                        perl -pi -e "s/<AWS_ACCOUNT_ID>/${AWS_ACCOUNT_ID}/g" k8s/backend/deployment.yaml k8s/frontend/frontend.yaml
+                        
                         kubectl apply -f k8s/namespace.yaml
                         kubectl apply -f k8s/backend/ -n ${KUBE_NAMESPACE}
                         kubectl apply -f k8s/frontend/ -n ${KUBE_NAMESPACE}
