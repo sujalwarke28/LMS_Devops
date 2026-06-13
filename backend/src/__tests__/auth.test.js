@@ -27,12 +27,21 @@ const verifyIdTokenMock = admin.auth().verifyIdToken;
 
 describe('Auth Endpoints', () => {
   beforeAll(async () => {
-    // Connect to test database or local DB
-    // Use MONGODB_URI but customize DB name to prevent overwriting prod/dev data
-    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/lms_test';
-    const testUri = uri.includes('?') 
-      ? uri.replace(/\/\?/, '/lms_test?') 
-      : uri + '/lms_test';
+    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+    let testUri;
+    if (uri.includes('?')) {
+      const queryIdx = uri.indexOf('?');
+      const prefix = uri.substring(0, queryIdx);
+      const lastSlashIdx = prefix.lastIndexOf('/');
+      testUri = prefix.substring(0, lastSlashIdx) + '/lms_test' + uri.substring(queryIdx);
+    } else {
+      const lastSlashIdx = uri.lastIndexOf('/');
+      if (lastSlashIdx <= 10) {
+        testUri = uri + '/lms_test';
+      } else {
+        testUri = uri.substring(0, lastSlashIdx) + '/lms_test';
+      }
+    }
     
     await mongoose.connect(testUri);
   });
