@@ -103,14 +103,19 @@ const getLectureStream = asyncHandler(async (req, res) => {
   const lecture = course.lectures.id(req.params.lectureId);
   if (!lecture) return ApiResponse.error(res, 'Lecture not found', 404);
 
-  // Verify enrollment
-  const enrolled = await Enrollment.findOne({
-    student: req.user._id,
-    course: course._id,
-    status: 'active',
-  });
-  if (!enrolled && req.user.role === 'student') {
-    return ApiResponse.error(res, 'You are not enrolled in this course', 403);
+  // Verify enrollment (unless it is a preview lecture or the user is the instructor/admin)
+  const isInstructor = course.instructor && course.instructor.toString() === req.user._id.toString();
+  const isAdmin = req.user.role === 'admin';
+
+  if (!lecture.isPreview && !isInstructor && !isAdmin) {
+    const enrolled = await Enrollment.findOne({
+      student: req.user._id,
+      course: course._id,
+      status: 'active',
+    });
+    if (!enrolled) {
+      return ApiResponse.error(res, 'You are not enrolled in this course', 403);
+    }
   }
 
   if (!lecture.videoKey) return ApiResponse.error(res, 'No video available', 404);
