@@ -18,8 +18,7 @@ spec:
   #       - lms.yourdomain.com
   #     secretName: lms-tls
   rules:
-    - host: lms.yourdomain.com
-      http:
+    - http:
         paths:
           - path: /api
             pathType: Prefix
