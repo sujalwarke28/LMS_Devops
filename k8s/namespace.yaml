@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lms
+  labels:
+    app.kubernetes.io/name: lms
+    app.kubernetes.io/managed-by: kubectl
