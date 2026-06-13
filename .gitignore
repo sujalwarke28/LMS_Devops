@@ -58,3 +58,4 @@ firebase-adminsdk*.json
 # Credentials / Keys
 *.csv
 keys.txt
+id_lms_jenkins*
