@@ -20,14 +20,24 @@ const generateCertificate = asyncHandler(async (req, res) => {
   });
   if (existing) return ApiResponse.success(res, existing, 'Certificate already exists');
 
-  // Verify course is completed
-  const progress = await Progress.findOne({
-    student: req.user._id,
-    course: courseId,
-    isCompleted: true,
-  });
-  if (!progress) {
-    return ApiResponse.error(res, 'Course not yet completed', 400);
+  const Quiz = require('../models/Quiz');
+  const QuizAttempt = require('../models/QuizAttempt');
+
+  // Verify student has passed the course quizzes
+  const courseQuizzes = await Quiz.find({ course: courseId, isPublished: true });
+  if (courseQuizzes.length === 0) {
+    return ApiResponse.error(res, 'This course does not have a quiz required for certification.', 400);
+  }
+
+  for (const quiz of courseQuizzes) {
+    const passedAttempt = await QuizAttempt.findOne({
+      student: req.user._id,
+      quiz: quiz._id,
+      passed: true
+    });
+    if (!passedAttempt) {
+      return ApiResponse.error(res, 'You must pass the course quiz to earn a certificate', 400);
+    }
   }
 
   const course = await Course.findById(courseId).populate('instructor', 'name');

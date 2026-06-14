@@ -4,13 +4,16 @@ import ReactPlayer from 'react-player';
 import { courseService, progressService, quizService } from '../../services';
 import { CheckCircle, Circle, PlayCircle, FileText, BookOpen } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import QuizPage from './QuizPage';
+import { certificateService } from '../../services';
 
 export default function LearnCourse() {
   const { courseId } = useParams();
   const [course, setCourse] = useState(null);
   const [progress, setProgress] = useState(null);
   const [currentLecture, setCurrentLecture] = useState(null);
+  const [currentQuiz, setCurrentQuiz] = useState(null);
   const [streamUrl, setStreamUrl] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,8 +48,11 @@ export default function LearnCourse() {
     });
   }, [courseId]);
 
+  const navigate = useNavigate();
+
   const selectLecture = async (lecture) => {
     setCurrentLecture(lecture);
+    setCurrentQuiz(null);
     setStreamUrl(null);
     try {
       const { data } = await courseService.getStreamUrl(courseId, lecture._id);
@@ -56,15 +62,28 @@ export default function LearnCourse() {
     }
   };
 
+  const selectQuiz = (quiz) => {
+    setCurrentQuiz(quiz);
+    setCurrentLecture(null);
+    setStreamUrl(null);
+  };
+
+  const claimCertificate = async () => {
+    try {
+      const { data } = await certificateService.generate(courseId);
+      toast.success('Certificate generated! 🎉');
+      navigate('/student/certificates');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to generate certificate');
+    }
+  };
+
   const markComplete = async () => {
     if (!currentLecture) return;
     try {
       const { data } = await progressService.markComplete(courseId, currentLecture._id, { watchedSeconds: 0 });
       setProgress(data.data);
       toast.success('Lecture marked as complete!');
-      if (data.data.isCompleted) {
-        toast.success('🎉 Course completed! Generate your certificate.', { duration: 5000 });
-      }
     } catch (err) {
       toast.error('Failed to mark complete');
     }
@@ -141,29 +160,21 @@ export default function LearnCourse() {
               )}
             </div>
 
-            {/* Quizzes */}
-            {quizzes.length > 0 && (
-              <div className="card" style={{ marginTop: '1rem' }}>
-                <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Course Quizzes</h3>
-                {quizzes.map((q) => (
-                  <div key={q._id} className="flex items-center justify-between" style={{
-                    padding: '0.75rem', background: 'var(--clr-surface-2)',
-                    borderRadius: 'var(--radius)', marginBottom: '0.5rem'
-                  }}>
-                    <div>
-                      <p style={{ fontWeight: 500, fontSize: '0.9rem' }}>{q.title}</p>
-                      <p style={{ fontSize: '0.78rem', color: 'var(--clr-text-muted)' }}>
-                        {q.questions?.length} questions · Pass: {q.passingScore}%
-                      </p>
-                    </div>
-                    <Link to={`/student/courses/${courseId}/quiz/${q._id}`} className="btn btn-primary btn-sm">
-                      Take Quiz
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            )}
           </>
+        ) : currentQuiz ? (
+          <div style={{ background: 'var(--clr-surface)', borderRadius: 'var(--radius-lg)', minHeight: '600px', paddingBottom: '2rem' }}>
+            <QuizPage courseId={courseId} quizId={currentQuiz._id} onQuizComplete={(attempt) => {
+               if (attempt.passed) {
+                 // optionally refresh anything
+               }
+            }} />
+            <div style={{ textAlign: 'center', marginTop: '2rem', padding: '1rem', borderTop: '1px solid var(--clr-border)' }}>
+              <p style={{ marginBottom: '1rem', color: 'var(--clr-text-muted)' }}>Did you pass the quiz?</p>
+              <button className="btn btn-success" onClick={claimCertificate}>
+                <CheckCircle size={16} /> Claim Certificate
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="empty-state"><h3>Select a lecture to start learning</h3></div>
         )}
@@ -206,6 +217,32 @@ export default function LearnCourse() {
             </div>
           );
         })}
+
+        {quizzes.length > 0 && (
+          <div style={{ marginTop: '1rem' }}>
+            <div style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', fontWeight: 600, color: 'var(--clr-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Quizzes & Certification
+            </div>
+            {quizzes.map((q) => {
+              const active = currentQuiz?._id === q._id;
+              return (
+                <div
+                  key={q._id}
+                  className={`lecture-item ${active ? 'active' : ''}`}
+                  onClick={() => selectQuiz(q)}
+                >
+                  <FileText size={15} style={{ color: 'var(--clr-primary)' }} />
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: '0.85rem', fontWeight: active ? 600 : 400 }}>{q.title}</p>
+                    <p style={{ fontSize: '0.72rem', color: 'var(--clr-text-dim)' }}>
+                      Pass: {q.passingScore}%
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

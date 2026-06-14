@@ -4,17 +4,25 @@ import { quizService } from '../../services';
 import { CheckCircle, XCircle, Clock, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-export default function QuizPage() {
-  const { courseId, quizId } = useParams();
+export default function QuizPage({ courseId: propCourseId, quizId: propQuizId, onQuizComplete }) {
+  const params = useParams();
   const navigate = useNavigate();
+  
+  const courseId = propCourseId || params.courseId;
+  const quizId = propQuizId || params.quizId;
+
   const [quiz, setQuiz] = useState(null);
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [startTime] = useState(Date.now());
+  const [startTime, setStartTime] = useState(Date.now());
 
   useEffect(() => {
+    setLoading(true);
+    setResult(null);
+    setAnswers({});
+    setStartTime(Date.now());
     quizService.getById(quizId)
       .then(({ data }) => setQuiz(data.data))
       .catch(() => toast.error('Quiz not found'))
@@ -36,6 +44,7 @@ export default function QuizPage() {
       setResult(data.data);
       if (data.data.attempt.passed) {
         toast.success('🎉 You passed!');
+        if (onQuizComplete) onQuizComplete(data.data.attempt);
       } else {
         toast.error('Not quite — keep practicing!');
       }
