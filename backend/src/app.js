@@ -29,7 +29,9 @@ const app = express();
 collectDefaultMetrics({ prefix: 'lms_' });
 
 // ─── Security middleware ──────────────────────────────────
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+}));
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true,
@@ -51,6 +53,10 @@ app.use('/api/', limiter);
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ─── Static files (Local Uploads) ─────────────────────────
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // ─── Logging ──────────────────────────────────────────────
 app.use(morgan('combined', {
@@ -93,3 +99,6 @@ app.use(notFound);
 app.use(errorHandler);
 
 module.exports = app;
+
+
+

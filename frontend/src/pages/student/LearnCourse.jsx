@@ -84,7 +84,19 @@ export default function LearnCourse() {
           <>
             <div className="video-player-wrapper" style={{ marginBottom: '1.5rem' }}>
               {streamUrl ? (
-                <ReactPlayer url={streamUrl} controls width="100%" height="100%" />
+                <video 
+                  key={streamUrl}
+                  src={streamUrl} 
+                  controls 
+                  width="100%" 
+                  height="100%" 
+                  autoPlay
+                  onError={(e) => {
+                    console.error('Video error:', e.nativeEvent);
+                    toast.error('Video format unsupported or stream unreachable.');
+                  }}
+                  style={{ objectFit: 'contain', backgroundColor: '#000' }}
+                />
               ) : (
                 <div style={{
                   width: '100%', height: '100%', display: 'flex', flexDirection: 'column',

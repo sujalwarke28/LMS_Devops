@@ -30,7 +30,12 @@ const getCourses = asyncHandler(async (req, res) => {
     Course.countDocuments(filter),
   ]);
 
-  ApiResponse.paginated(res, courses, {
+  const signedCourses = courses.map(c => ({
+    ...c,
+    thumbnailUrl: c.thumbnailKey ? getSignedUrl(c.thumbnailKey, 86400) : c.thumbnailUrl
+  }));
+
+  ApiResponse.paginated(res, signedCourses, {
     page: parseInt(page),
     limit: parseInt(limit),
     total,
@@ -54,6 +59,7 @@ const getCourseBySlug = asyncHandler(async (req, res) => {
   // Strip S3 video URLs from lecture list for non-enrolled users (preview only)
   const sanitized = {
     ...course,
+    thumbnailUrl: course.thumbnailKey ? getSignedUrl(course.thumbnailKey, 86400) : course.thumbnailUrl,
     lectures: course.lectures.map((l) => ({
       ...l,
       videoUrl: l.isPreview ? l.videoUrl : undefined,
@@ -88,7 +94,12 @@ const getCourseById = asyncHandler(async (req, res) => {
     }
   }
 
-  ApiResponse.success(res, course, 'Course details');
+  const courseObj = course.toObject ? course.toObject() : course;
+  if (courseObj.thumbnailKey) {
+    courseObj.thumbnailUrl = getSignedUrl(courseObj.thumbnailKey, 86400);
+  }
+
+  ApiResponse.success(res, courseObj, 'Course details');
 });
 
 
@@ -118,9 +129,25 @@ const getLectureStream = asyncHandler(async (req, res) => {
     }
   }
 
-  if (!lecture.videoKey) return ApiResponse.error(res, 'No video available', 404);
+  if (!lecture.videoKey && !lecture.videoUrl) return ApiResponse.error(res, 'No video available', 404);
 
-  const signedUrl = getSignedUrl(lecture.videoKey, 3600);
+  let signedUrl = lecture.videoUrl;
+  
+  if (lecture.videoUrl && (lecture.videoUrl.includes('/uploads/videos/') || lecture.videoUrl.includes('/api/v1/files/') || lecture.videoUrl.startsWith('http://localhost'))) {
+    // Local video
+    signedUrl = lecture.videoUrl;
+    
+    // Fix broken legacy path
+    if (signedUrl.includes('/api/v1/files/videos/')) {
+      const filename = signedUrl.split('/').pop();
+      const baseUrl = process.env.BACKEND_URL || `${req.protocol}://${req.get('host')}`;
+      signedUrl = `${baseUrl}/uploads/videos/${filename}`;
+    }
+  } else if (lecture.videoKey) {
+    // Legacy S3 video
+    signedUrl = getSignedUrl(lecture.videoKey, 3600);
+  }
+
   ApiResponse.success(res, { signedUrl, expiresIn: 3600 }, 'Stream URL generated');
 });
 
@@ -201,7 +228,13 @@ const getInstructorCourses = asyncHandler(async (req, res) => {
   const courses = await Course.find({ instructor: req.user._id })
     .select('-lectures.videoKey')
     .lean();
-  ApiResponse.success(res, courses);
+
+  const signedCourses = courses.map(c => ({
+    ...c,
+    thumbnailUrl: c.thumbnailKey ? getSignedUrl(c.thumbnailKey, 86400) : c.thumbnailUrl
+  }));
+
+  ApiResponse.success(res, signedCourses);
 });
 
 /**

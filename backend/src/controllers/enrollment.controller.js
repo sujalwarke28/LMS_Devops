@@ -40,10 +40,20 @@ const enrollInCourse = asyncHandler(async (req, res) => {
  */
 const getMyEnrollments = asyncHandler(async (req, res) => {
   const enrollments = await Enrollment.find({ student: req.user._id })
-    .populate('course', 'title thumbnailUrl slug category level totalDuration instructor')
+    .populate('course', 'title thumbnailUrl thumbnailKey slug category level totalDuration instructor')
     .populate({ path: 'course', populate: { path: 'instructor', select: 'name' } })
     .lean();
-  ApiResponse.success(res, enrollments);
+
+  const { getSignedUrl } = require('../services/s3.service');
+
+  const signedEnrollments = enrollments.map(e => {
+    if (e.course && e.course.thumbnailKey) {
+      e.course.thumbnailUrl = getSignedUrl(e.course.thumbnailKey, 86400);
+    }
+    return e;
+  });
+
+  ApiResponse.success(res, signedEnrollments);
 });
 
 /**
