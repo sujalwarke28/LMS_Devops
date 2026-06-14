@@ -18,6 +18,20 @@ export default function InstructorDashboard() {
 
   const totalStudents = courses.reduce((s, c) => s + (c.enrollmentCount || 0), 0);
 
+  const handleDelete = async (id, title) => {
+    if (!window.confirm(`Are you sure you want to delete the course "${title}"? This action cannot be undone.`)) {
+      return;
+    }
+    try {
+      await courseService.remove(id);
+      setCourses(courses.filter(c => c._id !== id));
+      toast.success('Course deleted successfully');
+    } catch (err) {
+      toast.error('Failed to delete course');
+      console.error(err);
+    }
+  };
+
   if (loading) return <div className="loading-screen"><div className="spinner" /></div>;
 
   return (
@@ -93,12 +107,15 @@ export default function InstructorDashboard() {
                     </td>
                     <td>
                       <div className="flex gap-1">
-                        <Link to={`/instructor/courses/${c._id}/edit`} className="btn btn-ghost btn-sm">
+                        <Link to={`/instructor/courses/${c._id}/edit`} className="btn btn-ghost btn-sm" title="Edit Course">
                           <Edit size={13} />
                         </Link>
-                        <Link to={`/instructor/courses/${c._id}/students`} className="btn btn-ghost btn-sm">
+                        <Link to={`/instructor/courses/${c._id}/students`} className="btn btn-ghost btn-sm" title="View Students">
                           <Users size={13} />
                         </Link>
+                        <button onClick={() => handleDelete(c._id, c.title)} className="btn btn-ghost btn-sm" style={{ color: 'var(--clr-danger)' }} title="Delete Course">
+                          <Trash2 size={13} />
+                        </button>
                       </div>
                     </td>
                   </tr>

@@ -216,6 +216,13 @@ const deleteCourse = asyncHandler(async (req, res) => {
   });
   await Promise.allSettled(deletions);
 
+  // Delete related documents to prevent orphans
+  await Promise.allSettled([
+    require('../models/Enrollment').deleteMany({ course: course._id }),
+    require('../models/Progress').deleteMany({ course: course._id }),
+    require('../models/Quiz').deleteMany({ course: course._id }),
+  ]);
+
   await course.deleteOne();
 
   ApiResponse.success(res, null, 'Course deleted');
