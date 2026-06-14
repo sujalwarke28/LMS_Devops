@@ -32,7 +32,7 @@ export default function LandingPage() {
               Learn. Build. <span className="gradient-text">Deploy.</span>
             </h1>
             <p className="hero-subtitle">
-              A production-grade DevOps LMS with Google Authentication, role-based dashboards,
+              A production-grade learning management system with Google Authentication, role-based dashboards,
               live video lectures, auto-graded quizzes, and verifiable certificates — all running
               on Kubernetes.
             </p>
@@ -107,7 +107,7 @@ export default function LandingPage() {
 
       <footer className="footer">
         <div className="container">
-          <p>© 2024 DevOPS LMS — Enterprise Learning Management Ecosystem</p>
+          <p>© 2024 Engrail — Enterprise Learning Management Ecosystem</p>
         </div>
       </footer>
     </>

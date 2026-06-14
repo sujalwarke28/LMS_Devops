@@ -2,9 +2,9 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   GraduationCap, BookOpen, LayoutDashboard, Users, BarChart3,
-  LogOut, Menu, X, ChevronDown, Award, Settings
+  LogOut, Menu, X, ChevronDown, Award, Sun, Moon
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const navLinks = {
   student: [
@@ -31,6 +31,33 @@ export const Navbar = () => {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    let timer;
+    if (profileOpen) {
+      timer = setTimeout(() => {
+        setProfileOpen(false);
+      }, 3000);
+    }
+    return () => clearTimeout(timer);
+  }, [profileOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const links = user ? navLinks[user.role] || [] : [];
 
@@ -45,7 +72,7 @@ export const Navbar = () => {
         {/* Brand */}
         <Link to="/" className="navbar-brand">
           <GraduationCap className="navbar-brand-icon" />
-          <span>DevOPS LMS</span>
+          <span>Engrail</span>
         </Link>
 
         {/* Desktop nav links */}
@@ -73,8 +100,16 @@ export const Navbar = () => {
 
         {/* Right side */}
         <div className="navbar-right">
+          <button 
+            className="btn btn-ghost btn-icon" 
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            title="Toggle theme"
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+          
           {user ? (
-            <div className="profile-menu">
+            <div className="profile-menu" ref={dropdownRef}>
               <button
                 className="profile-trigger"
                 onClick={() => setProfileOpen(!profileOpen)}

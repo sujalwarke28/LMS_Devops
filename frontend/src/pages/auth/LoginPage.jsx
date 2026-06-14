@@ -35,10 +35,10 @@ export default function LoginPage() {
         <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
           <div style={{ fontSize: '5rem', marginBottom: '1.5rem' }}>🎓</div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 700, marginBottom: '1rem' }}>
-            DevOPS LMS
+            Engrail
           </h2>
           <p style={{ color: 'var(--clr-text-muted)', maxWidth: 320, lineHeight: 1.7 }}>
-            An enterprise-grade Learning Management System built with modern DevOps practices —
+            An enterprise-grade Learning Management System —
             containerized, auto-scaled, and continuously deployed.
           </p>
           <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginTop: '2.5rem' }}>
@@ -62,7 +62,7 @@ export default function LoginPage() {
         <div className="login-box">
           <div className="login-logo">
             <GraduationCap size={32} />
-            DevOPS LMS
+            Engrail
           </div>
           <div>
             <h1 className="login-heading">Welcome back</h1>
