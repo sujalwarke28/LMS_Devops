@@ -4,11 +4,11 @@
    DESIGN TOKENS
 ════════════════════════════════════════════════════════ */
 :root {
-  /* Colors - Base Theme (Dark - Deep Space Blue) */
-  --clr-bg: #003049;
-  --clr-surface: #003d5c;
-  --clr-surface-2: #004a70;
-  --clr-surface-3: #005885;
+  /* Colors - Base Theme (Dark - Original) */
+  --clr-bg: #0a0a0f;
+  --clr-surface: #13131a;
+  --clr-surface-2: #1c1c27;
+  --clr-surface-3: #252533;
   --clr-border: rgba(255,255,255,0.08);
   --clr-border-strong: rgba(255,255,255,0.15);
 
@@ -27,13 +27,13 @@
   --clr-danger: #ef4444;
   --clr-danger-light: rgba(239,68,68,0.12);
 
-  --clr-text: #fdf0d5;
-  --clr-text-muted: #b8cdd6;
-  --clr-text-dim: #8daab9;
+  --clr-text: #f1f1f5;
+  --clr-text-muted: #8b8ca0;
+  --clr-text-dim: #5a5b70;
 
   /* Gradients */
   --grad-primary: linear-gradient(135deg, #780000 0%, #c1121f 100%);
-  --grad-hero: linear-gradient(135deg, #003049 0%, #003d5c 50%, #002233 100%);
+  --grad-hero: linear-gradient(135deg, #0a0a0f 0%, #13131a 50%, #1a1030 100%);
   --grad-card: linear-gradient(145deg, var(--clr-surface) 0%, var(--clr-surface-2) 100%);
   --grad-accent: linear-gradient(135deg, #669bbc 0%, #003049 100%);
   --grad-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -62,10 +62,10 @@
 }
 
 [data-theme='light'] {
-  --clr-bg: #fdf0d5;
-  --clr-surface: #fff;
-  --clr-surface-2: #f2e2be;
-  --clr-surface-3: #e8d5ac;
+  --clr-bg: #fdfaf3; /* Toned down Papaya Whip */
+  --clr-surface: #ffffff;
+  --clr-surface-2: #f6eedb;
+  --clr-surface-3: #eedfc4;
   --clr-border: rgba(0,0,0,0.08);
   --clr-border-strong: rgba(0,0,0,0.15);
 
@@ -77,8 +77,8 @@
   --clr-primary-light: rgba(120, 0, 0, 0.08);
   --clr-accent-glow: rgba(102, 155, 188, 0.15);
 
-  --grad-hero: linear-gradient(135deg, #fdf0d5 0%, #fff 50%, #f4e3c1 100%);
-  --grad-card: linear-gradient(145deg, #fff 0%, #fdf0d5 100%);
+  --grad-hero: linear-gradient(135deg, #fdfaf3 0%, #ffffff 50%, #f6eedb 100%);
+  --grad-card: linear-gradient(145deg, #ffffff 0%, #fdfaf3 100%);
 
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
   --shadow: 0 4px 20px rgba(0,0,0,0.08);
@@ -240,13 +240,10 @@ input, textarea, select { font-family: inherit; }
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.25rem;
-  background: var(--grad-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #fefae0;
   white-space: nowrap;
 }
-.navbar-brand-icon { color: var(--clr-primary); flex-shrink: 0; }
+.navbar-brand-icon { color: #fefae0; flex-shrink: 0; }
 .navbar-links {
   display: flex;
   align-items: center;
@@ -260,11 +257,11 @@ input, textarea, select { font-family: inherit; }
   padding: 0.5rem 0.85rem;
   border-radius: var(--radius-sm);
   font-size: 0.88rem;
-  color: var(--clr-text-muted);
+  color: #fefae0;
   transition: var(--transition);
 }
-.navbar-link:hover { color: var(--clr-text); background: var(--clr-surface-2); }
-.navbar-link.active { color: var(--clr-primary); background: var(--clr-primary-light); }
+.navbar-link:hover { color: #fefae0; background: var(--clr-surface-2); }
+.navbar-link.active { color: #fefae0; background: var(--clr-primary-light); }
 .navbar-right {
   display: flex;
   align-items: center;
@@ -916,7 +913,7 @@ input, textarea, select { font-family: inherit; }
   background: var(--clr-bg);
 }
 .login-visual {
-  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+  background: var(--clr-primary);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -924,16 +921,6 @@ input, textarea, select { font-family: inherit; }
   padding: 3rem;
   position: relative;
   overflow: hidden;
-}
-.login-visual::before {
-  content: '';
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
-  top: -200px;
-  left: -200px;
 }
 .login-form-side {
   display: flex;
@@ -1059,6 +1046,10 @@ input, textarea, select { font-family: inherit; }
   border: 1px solid var(--clr-border) !important;
   color: var(--clr-text) !important;
   border-radius: var(--radius) !important;
+  width: fit-content !important;
+  min-width: 250px;
+  max-width: 500px;
+  margin: 0 auto !important;
 }
 
 /* ════════════════════════════════════════════════════════
