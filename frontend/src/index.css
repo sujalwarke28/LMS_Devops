@@ -260,8 +260,8 @@ input, textarea, select { font-family: inherit; }
   color: #fefae0;
   transition: var(--transition);
 }
-.navbar-link:hover { color: #fefae0; background: var(--clr-surface-2); }
-.navbar-link.active { color: #fefae0; background: var(--clr-primary-light); }
+.navbar-link:hover { color: #1a1a1a; background: #fefae0; }
+.navbar-link.active { color: #1a1a1a; background: #fefae0; }
 .navbar-right {
   display: flex;
   align-items: center;
@@ -1039,18 +1039,9 @@ input, textarea, select { font-family: inherit; }
 .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ════════════════════════════════════════════════════════
-   TOASTS (react-hot-toast overrides)
+   TOASTS
 ════════════════════════════════════════════════════════ */
-.Toastify__toast, div[class*="go"] {
-  background: var(--clr-surface-2) !important;
-  border: 1px solid var(--clr-border) !important;
-  color: var(--clr-text) !important;
-  border-radius: var(--radius) !important;
-  width: fit-content !important;
-  min-width: 250px;
-  max-width: 500px;
-  margin: 0 auto !important;
-}
+/* Styling handled in App.jsx toastOptions */
 
 /* ════════════════════════════════════════════════════════
    FOOTER

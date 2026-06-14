@@ -41,11 +41,23 @@ function App() {
         <Toaster
           position="top-right"
           toastOptions={{
+            duration: 2500,
             style: {
               background: 'var(--clr-surface-2)',
               color: 'var(--clr-text)',
               border: '1px solid var(--clr-border)',
-              borderRadius: '12px',
+              borderRadius: '8px',
+            },
+            success: {
+              style: {
+                background: '#10b981',
+                color: '#ffffff',
+                border: 'none',
+              },
+              iconTheme: {
+                primary: '#ffffff',
+                secondary: '#10b981',
+              },
             },
           }}
         />
