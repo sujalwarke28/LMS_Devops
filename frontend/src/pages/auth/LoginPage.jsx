@@ -32,12 +32,12 @@ export default function LoginPage() {
     <div className="login-page">
       {/* Left visual */}
       <div className="login-visual">
-        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-          <div style={{ fontSize: '5rem', marginBottom: '1.5rem' }}>🎓</div>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 700, marginBottom: '1rem' }}>
+        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <GraduationCap size={72} color="#fefae0" style={{ marginBottom: '1.5rem' }} />
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 700, marginBottom: '1rem', color: '#fefae0' }}>
             Engrail
           </h2>
-          <p style={{ color: 'var(--clr-text-muted)', maxWidth: 320, lineHeight: 1.7 }}>
+          <p style={{ color: '#fefae0', opacity: 0.9, maxWidth: 320, lineHeight: 1.7 }}>
             An enterprise-grade Learning Management System —
             containerized, auto-scaled, and continuously deployed.
           </p>
@@ -49,7 +49,7 @@ export default function LoginPage() {
                 borderRadius: '8px',
                 padding: '0.5rem 0.85rem',
                 fontSize: '0.75rem',
-                color: 'var(--clr-text-muted)',
+                color: '#fefae0',
                 fontWeight: 500,
               }}>{tech}</div>
             ))}
@@ -60,10 +60,6 @@ export default function LoginPage() {
       {/* Right form */}
       <div className="login-form-side">
         <div className="login-box">
-          <div className="login-logo">
-            <GraduationCap size={32} />
-            Engrail
-          </div>
           <div>
             <h1 className="login-heading">Welcome back</h1>
             <p className="login-sub">Sign in to access your learning dashboard</p>
