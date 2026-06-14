@@ -77,29 +77,34 @@ export default function StudentDashboard() {
             <Link to="/courses" className="btn btn-primary">Browse Courses</Link>
           </div>
         ) : (
-          <div className="course-grid">
-            {enrollments.slice(0, 6).map((e) => {
-              const course = e.course;
-              if (!course) return null;
-              return (
-                <div key={e._id} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {course.thumbnailUrl && (
-                    <img src={course.thumbnailUrl} alt={course.title}
-                      style={{ borderRadius: 'var(--radius)', aspectRatio: '16/9', objectFit: 'cover' }} />
-                  )}
-                  <span className="course-category">{course.category}</span>
-                  <h3 style={{ fontSize: '0.95rem', fontWeight: 600, lineHeight: 1.4 }}>{course.title}</h3>
-                  <div className="flex items-center justify-between mt-auto">
-                    <span className={`badge ${e.status === 'completed' ? 'badge-success' : 'badge-primary'}`}>
-                      {e.status}
-                    </span>
-                    <Link to={`/student/courses/${course._id}/learn`} className="btn btn-primary btn-sm">
-                      <Play size={13} /> Continue
-                    </Link>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div className="course-grid">
+              {enrollments.slice(0, 6).map((e) => {
+                const course = e.course;
+                if (!course) return null;
+                return (
+                  <div key={e._id} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {course.thumbnailUrl && (
+                      <img src={course.thumbnailUrl} alt={course.title}
+                        style={{ borderRadius: 'var(--radius)', aspectRatio: '16/9', objectFit: 'cover' }} />
+                    )}
+                    <span className="course-category">{course.category}</span>
+                    <h3 style={{ fontSize: '0.95rem', fontWeight: 600, lineHeight: 1.4 }}>{course.title}</h3>
+                    <div className="flex items-center justify-between mt-auto">
+                      <span className={`badge ${e.status === 'completed' ? 'badge-success' : 'badge-primary'}`}>
+                        {e.status}
+                      </span>
+                      <Link to={`/student/courses/${course._id}/learn`} className="btn btn-primary btn-sm">
+                        <Play size={13} /> Continue
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+            <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+              <Link to="/courses" className="btn btn-secondary">Browse more courses</Link>
+            </div>
           </div>
         )}
       </div>

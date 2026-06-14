@@ -14,10 +14,31 @@ export default function EditCourse() {
   const [videoFile, setVideoFile] = useState(null);
   const [uploadingVideo, setUploadingVideo] = useState(false);
 
+  // Quiz States
+  const [quizzes, setQuizzes] = useState([]);
+  const [showQuizForm, setShowQuizForm] = useState(false);
+  const [quizForm, setQuizForm] = useState({
+    title: '',
+    description: '',
+    passingScore: 70,
+    questions: [
+      {
+        questionText: '',
+        options: [
+          { text: '', isCorrect: false },
+          { text: '', isCorrect: false },
+          { text: '', isCorrect: false },
+          { text: '', isCorrect: false },
+        ]
+      }
+    ]
+  });
+
   useEffect(() => {
     import('../../services/api').then(({ default: api }) => {
       api.get(`/courses/${id}`).then(({ data }) => setCourse(data.data));
     });
+    quizService.getByCourse(id).then(({ data }) => setQuizzes(data.data || []));
   }, [id]);
 
   const handleInfoSave = async () => {
@@ -80,6 +101,62 @@ export default function EditCourse() {
     setCourse(updated);
     await courseService.update(id, { isPublished: updated.isPublished });
     toast.success(updated.isPublished ? 'Course published!' : 'Course unpublished');
+  };
+
+  // Quiz Handlers
+  const handleAddQuestion = () => {
+    setQuizForm(prev => ({
+      ...prev,
+      questions: [
+        ...prev.questions,
+        {
+          questionText: '',
+          options: [
+            { text: '', isCorrect: false },
+            { text: '', isCorrect: false },
+            { text: '', isCorrect: false },
+            { text: '', isCorrect: false },
+          ]
+        }
+      ]
+    }));
+  };
+
+  const handleSaveQuiz = async (e) => {
+    e.preventDefault();
+    // Validation: Check if every question has exactly 1 correct answer
+    for (let i = 0; i < quizForm.questions.length; i++) {
+      const q = quizForm.questions[i];
+      const hasCorrect = q.options.some(o => o.isCorrect);
+      if (!hasCorrect) {
+        return toast.error(`Please select a correct answer for question ${i + 1}`);
+      }
+    }
+
+    try {
+      const { data } = await quizService.create({ ...quizForm, course: id });
+      setQuizzes(prev => [...prev, data.data]);
+      setShowQuizForm(false);
+      setQuizForm({
+        title: '', description: '', passingScore: 70,
+        questions: [{ questionText: '', options: [{ text: '', isCorrect: false }, { text: '', isCorrect: false }, { text: '', isCorrect: false }, { text: '', isCorrect: false }] }]
+      });
+      toast.success('Quiz created successfully');
+    } catch (err) {
+      toast.error('Failed to create quiz');
+      console.error(err);
+    }
+  };
+
+  const handleDeleteQuiz = async (quizId) => {
+    if (!confirm('Delete this quiz?')) return;
+    try {
+      await quizService.remove(quizId);
+      setQuizzes(prev => prev.filter(q => q._id !== quizId));
+      toast.success('Quiz deleted');
+    } catch (err) {
+      toast.error('Failed to delete quiz');
+    }
   };
 
   if (!course) return <div className="loading-screen"><div className="spinner" /></div>;
@@ -184,10 +261,101 @@ export default function EditCourse() {
       )}
 
       {tab === 'quizzes' && (
-        <div className="card">
-          <p style={{ color: 'var(--clr-text-muted)', textAlign: 'center', padding: '2rem 0' }}>
-            Quiz management coming soon. Use the API directly to create quizzes for this course.
-          </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {!showQuizForm ? (
+            <>
+              {quizzes.map((q, i) => (
+                <div key={q._id} className="card flex items-center justify-between">
+                  <div>
+                    <p style={{ fontWeight: 500 }}>{i + 1}. {q.title}</p>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--clr-text-muted)' }}>{q.questions.length} Questions • Passing: {q.passingScore}%</p>
+                  </div>
+                  <button className="btn btn-danger btn-sm" onClick={() => handleDeleteQuiz(q._id)}>
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              ))}
+              <div className="card" style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                <button className="btn btn-primary" onClick={() => setShowQuizForm(true)}>
+                  <PlusCircle size={15} /> Create New MCQ Quiz
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="card">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="card-title">Create MCQ Quiz</h3>
+                <button className="btn btn-ghost btn-sm" onClick={() => setShowQuizForm(false)}>Cancel</button>
+              </div>
+              <form onSubmit={handleSaveQuiz} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                <div className="form-group">
+                  <label className="form-label">Quiz Title *</label>
+                  <input className="form-input" required value={quizForm.title} onChange={e => setQuizForm(p => ({ ...p, title: e.target.value }))} placeholder="e.g. End of Section 1 Quiz" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Passing Score (%)</label>
+                  <input type="number" min="0" max="100" className="form-input" required value={quizForm.passingScore} onChange={e => setQuizForm(p => ({ ...p, passingScore: e.target.value }))} />
+                </div>
+
+                <hr style={{ borderColor: 'var(--clr-border)', margin: '0.5rem 0' }} />
+
+                {quizForm.questions.map((q, qIndex) => (
+                  <div key={qIndex} style={{ padding: '1rem', background: 'var(--clr-bg-alt)', borderRadius: 'var(--radius)', border: '1px solid var(--clr-border)' }}>
+                    <div className="form-group mb-3">
+                      <label className="form-label">Question {qIndex + 1}</label>
+                      <textarea className="form-textarea" required rows={2} value={q.questionText} onChange={e => {
+                        const newQ = [...quizForm.questions];
+                        newQ[qIndex].questionText = e.target.value;
+                        setQuizForm(p => ({ ...p, questions: newQ }));
+                      }} placeholder="What is the capital of..." />
+                    </div>
+                    <label className="form-label mb-2">Options (Select the correct one)</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                      {['A', 'B', 'C', 'D'].map((label, oIndex) => (
+                        <div key={oIndex} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <input 
+                            type="radio" 
+                            name={`correct-${qIndex}`} 
+                            required 
+                            checked={q.options[oIndex].isCorrect}
+                            onChange={() => {
+                              const newQ = [...quizForm.questions];
+                              newQ[qIndex].options.forEach((o, i) => o.isCorrect = i === oIndex);
+                              setQuizForm(p => ({ ...p, questions: newQ }));
+                            }}
+                            style={{ cursor: 'pointer' }}
+                          />
+                          <span style={{ fontWeight: 600, width: '20px' }}>{label}.</span>
+                          <input 
+                            className="form-input" 
+                            required 
+                            value={q.options[oIndex].text}
+                            onChange={e => {
+                              const newQ = [...quizForm.questions];
+                              newQ[qIndex].options[oIndex].text = e.target.value;
+                              setQuizForm(p => ({ ...p, questions: newQ }));
+                            }}
+                            style={{ flex: 1, padding: '0.4rem 0.8rem' }}
+                            placeholder={`Option ${label}`}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                <button type="button" className="btn btn-secondary btn-sm" onClick={handleAddQuestion} style={{ alignSelf: 'flex-start' }}>
+                  <PlusCircle size={14} /> Add Another Question
+                </button>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+                  <button type="submit" className="btn btn-primary">
+                    <Save size={15} /> Save Quiz
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       )}
     </div>
