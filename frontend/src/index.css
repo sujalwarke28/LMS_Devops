@@ -885,13 +885,14 @@ input, textarea, select { font-family: inherit; }
    CERTIFICATE
 ════════════════════════════════════════════════════════ */
 .certificate-card {
-  background: linear-gradient(135deg, #1a1030 0%, #13131a 50%, #0d1a2e 100%);
-  border: 1px solid rgba(99,102,241,0.3);
+  background: var(--grad-card);
+  border: 1px solid var(--clr-border);
   border-radius: var(--radius-xl);
   padding: 2.5rem;
   text-align: center;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow);
 }
 .certificate-card::before {
   content: '';
