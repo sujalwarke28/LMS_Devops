@@ -134,7 +134,7 @@ export default function EditCourse() {
     }
 
     try {
-      const { data } = await quizService.create({ ...quizForm, course: id });
+      const { data } = await quizService.create({ ...quizForm, course: id, isPublished: true });
       setQuizzes(prev => [...prev, data.data]);
       setShowQuizForm(false);
       setQuizForm({

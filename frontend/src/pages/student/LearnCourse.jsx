@@ -218,31 +218,24 @@ export default function LearnCourse() {
           );
         })}
 
-        {quizzes.length > 0 && (
-          <div style={{ marginTop: '1rem' }}>
-            <div style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', fontWeight: 600, color: 'var(--clr-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Quizzes & Certification
+        {quizzes.map((q) => {
+          const active = currentQuiz?._id === q._id;
+          return (
+            <div
+              key={q._id}
+              className={`lecture-item ${active ? 'active' : ''}`}
+              onClick={() => selectQuiz(q)}
+            >
+              <FileText size={15} style={{ color: 'var(--clr-primary)' }} />
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: '0.85rem', fontWeight: active ? 600 : 400 }}>{q.title}</p>
+                <p style={{ fontSize: '0.72rem', color: 'var(--clr-text-dim)' }}>
+                  Pass: {q.passingScore}%
+                </p>
+              </div>
             </div>
-            {quizzes.map((q) => {
-              const active = currentQuiz?._id === q._id;
-              return (
-                <div
-                  key={q._id}
-                  className={`lecture-item ${active ? 'active' : ''}`}
-                  onClick={() => selectQuiz(q)}
-                >
-                  <FileText size={15} style={{ color: 'var(--clr-primary)' }} />
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: '0.85rem', fontWeight: active ? 600 : 400 }}>{q.title}</p>
-                    <p style={{ fontSize: '0.72rem', color: 'var(--clr-text-dim)' }}>
-                      Pass: {q.passingScore}%
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+          );
+        })}
       </div>
     </div>
   );
