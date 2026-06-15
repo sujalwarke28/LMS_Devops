@@ -1,0 +1,69 @@
+version: '3.9'
+
+services:
+  # ─── Monitoring ───────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    volumes:
+      - ./local-prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - lms-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "4000:3000" # Mapped to 4000 to avoid conflicting with React frontend
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+    networks:
+      - lms-network
+
+  # ─── Logging ──────────────────────────────────────────────
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # Prevent RAM issues on local machine
+    ports:
+      - "9200:9200"
+    networks:
+      - lms-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.9.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - lms-network
+
+  vault:
+    image: hashicorp/vault:1.14
+    container_name: vault
+    ports:
+      - "8200:8200"
+    environment:
+      - VAULT_DEV_ROOT_TOKEN_ID=root-token
+      - VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8200
+    networks:
+      - lms-network
+    cap_add:
+      - IPC_LOCK
+
+networks:
+  lms-network:
+    driver: bridge

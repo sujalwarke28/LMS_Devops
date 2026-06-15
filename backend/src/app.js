@@ -26,7 +26,7 @@ const uploadRoutes = require('./routes/upload.routes');
 const app = express();
 
 // ─── Prometheus metrics ───────────────────────────────────
-collectDefaultMetrics({ prefix: 'lms_' });
+collectDefaultMetrics();
 
 // ─── Security middleware ──────────────────────────────────
 app.use(helmet({
