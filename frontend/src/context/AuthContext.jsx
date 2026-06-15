@@ -86,6 +86,23 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const registerWithEmail = async (name, email, password) => {
+    try {
+      setLoading(true);
+      const { data } = await authService.register(name, email, password);
+      localStorage.setItem('lms_jwt_token', data.data.token);
+      setUser(data.data.user);
+      toast.success('Account created successfully');
+      return data.data.user;
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Registration failed. Please try again.';
+      toast.error(msg);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     try {
       await signOut(auth);
@@ -108,7 +125,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, loginWithGoogle, loginWithEmail, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, firebaseUser, loading, loginWithGoogle, loginWithEmail, registerWithEmail, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

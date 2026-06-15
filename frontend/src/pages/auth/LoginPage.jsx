@@ -6,21 +6,27 @@ import { GraduationCap } from 'lucide-react';
 const ROLE_HOME = { student: '/student/dashboard', instructor: '/instructor/dashboard', admin: '/admin/dashboard' };
 
 export default function LoginPage() {
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const { user, loading, loginWithGoogle, loginWithEmail } = useAuth();
+  const { user, loading, loginWithGoogle, loginWithEmail, registerWithEmail } = useAuth();
 
   if (!loading && user) {
     return <Navigate to={ROLE_HOME[user.role] || '/courses'} replace />;
   }
 
-  const handleEmailLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await loginWithEmail(email, password);
+      if (isRegistering) {
+        await registerWithEmail(name, email, password);
+      } else {
+        await loginWithEmail(email, password);
+      }
     } catch (err) {
       // toast notification is already managed by AuthContext
     } finally {
@@ -61,11 +67,28 @@ export default function LoginPage() {
       <div className="login-form-side">
         <div className="login-box">
           <div>
-            <h1 className="login-heading">Welcome back</h1>
-            <p className="login-sub">Sign in to access your learning dashboard</p>
+            <h1 className="login-heading">{isRegistering ? 'Create an account' : 'Welcome back'}</h1>
+            <p className="login-sub">
+              {isRegistering ? 'Sign up to start your learning journey' : 'Sign in to access your learning dashboard'}
+            </p>
           </div>
 
-          <form onSubmit={handleEmailLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+            {isRegistering && (
+              <div className="form-group">
+                <label className="form-label" style={{ color: 'var(--clr-text-dim)' }}>Full Name</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  disabled={loading || submitting}
+                  style={{ width: '100%' }}
+                />
+              </div>
+            )}
             <div className="form-group">
               <label className="form-label" style={{ color: 'var(--clr-text-dim)' }}>Email Address</label>
               <input
@@ -98,7 +121,7 @@ export default function LoginPage() {
               style={{ width: '100%', marginTop: '0.5rem' }}
               disabled={loading || submitting}
             >
-              {submitting ? 'Signing in...' : 'Sign In'}
+              {submitting ? (isRegistering ? 'Signing up...' : 'Signing in...') : (isRegistering ? 'Sign Up' : 'Sign In')}
             </button>
           </form>
 
@@ -125,8 +148,20 @@ export default function LoginPage() {
             Continue with Google
           </button>
 
-          <p style={{ fontSize: '0.78rem', color: 'var(--clr-text-dim)', textAlign: 'center', lineHeight: 1.5 }}>
-            By signing in, you agree to our Terms of Service and Privacy Policy.
+          <p style={{ fontSize: '0.85rem', color: 'var(--clr-text-dim)', textAlign: 'center', marginTop: '1rem' }}>
+            {isRegistering ? "Already have an account? " : "Don't have an account? "}
+            <button 
+              type="button"
+              className="btn btn-link" 
+              style={{ padding: 0, color: 'var(--clr-primary)', fontWeight: 600, fontSize: '0.85rem' }}
+              onClick={() => setIsRegistering(!isRegistering)}
+            >
+              {isRegistering ? 'Sign in' : 'Sign up'}
+            </button>
+          </p>
+
+          <p style={{ fontSize: '0.78rem', color: 'var(--clr-text-dim)', textAlign: 'center', lineHeight: 1.5, marginTop: '1.5rem' }}>
+            By continuing, you agree to our Terms of Service and Privacy Policy.
             New accounts default to the <strong style={{ color: 'var(--clr-text-muted)' }}>Student</strong> role.
           </p>
         </div>

@@ -15,7 +15,6 @@ const navLinks = {
   instructor: [
     { label: 'Dashboard', href: '/instructor/dashboard', icon: LayoutDashboard },
     { label: 'My Courses', href: '/instructor/courses', icon: BookOpen },
-    { label: 'Students', href: '/instructor/students', icon: Users },
   ],
   admin: [
     { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
@@ -70,7 +69,7 @@ export const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         {/* Brand */}
-        <Link to="/" className="navbar-brand">
+        <Link to={user ? `/${user.role}/dashboard` : "/"} className="navbar-brand">
           <GraduationCap className="navbar-brand-icon" />
           <span>Engrail</span>
         </Link>

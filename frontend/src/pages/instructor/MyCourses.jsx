@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { courseService } from '../../services';
-import { PlusCircle, Edit, BookOpen } from 'lucide-react';
+import { PlusCircle, Edit, BookOpen, Users } from 'lucide-react';
 
 export default function InstructorCourses() {
   const [courses, setCourses] = useState([]);
@@ -45,6 +45,9 @@ export default function InstructorCourses() {
                 <p className="text-muted text-sm">{c.enrollmentCount || 0} students · {c.lectures?.length || 0} lectures</p>
                 <div className="course-card-footer">
                   <Link to={`/courses/${c.slug}`} className="btn btn-ghost btn-sm">Preview</Link>
+                  <Link to={`/instructor/courses/${c._id}/students`} className="btn btn-ghost btn-sm">
+                    <Users size={13} /> Students
+                  </Link>
                   <Link to={`/instructor/courses/${c._id}/edit`} className="btn btn-primary btn-sm">
                     <Edit size={13} /> Edit
                   </Link>
