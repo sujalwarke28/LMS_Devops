@@ -8,7 +8,7 @@ metadata:
 data:
   NODE_ENV: "production"
   PORT: "5000"
-  FRONTEND_URL: "https://lms.yourdomain.com"
+  FRONTEND_URL: "http://a95a4aa877dd34947b527b5dcca12486-ba3b48707382ddc0.elb.ap-south-1.amazonaws.com"
   AWS_REGION: "ap-south-1"
   RATE_LIMIT_WINDOW_MS: "900000"
   RATE_LIMIT_MAX: "100"

@@ -30,6 +30,7 @@ collectDefaultMetrics();
 
 // ─── Security middleware ──────────────────────────────────
 app.use(helmet({
+  contentSecurityPolicy: false,
   crossOriginResourcePolicy: false,
 }));
 app.use(cors({
