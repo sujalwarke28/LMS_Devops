@@ -134,15 +134,10 @@ const getLectureStream = asyncHandler(async (req, res) => {
   let signedUrl = lecture.videoUrl;
   
   if (lecture.videoUrl && (lecture.videoUrl.includes('/uploads/videos/') || lecture.videoUrl.includes('/api/v1/files/') || lecture.videoUrl.startsWith('http://localhost'))) {
-    // Local video
-    signedUrl = lecture.videoUrl;
-    
-    // Fix broken legacy path
-    if (signedUrl.includes('/api/v1/files/videos/')) {
-      const filename = signedUrl.split('/').pop();
-      const baseUrl = process.env.BACKEND_URL || `${req.protocol}://${req.get('host')}`;
-      signedUrl = `${baseUrl}/uploads/videos/${filename}`;
-    }
+    // Dynamically replace localhost or old URL with the current domain making the request
+    const filename = lecture.videoUrl.split('/').pop();
+    const baseUrl = process.env.BACKEND_URL || `${req.protocol}://${req.get('host')}`;
+    signedUrl = `${baseUrl}/uploads/videos/${filename}`;
   } else if (lecture.videoKey) {
     // Legacy S3 video
     signedUrl = getSignedUrl(lecture.videoKey, 3600);

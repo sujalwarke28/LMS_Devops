@@ -58,7 +58,7 @@ const uploadSingle = asyncHandler(async (req, res) => {
 
   if (req.file.mimetype.startsWith('video/')) {
     // Keep locally
-    const baseUrl = process.env.BACKEND_URL || 'http://localhost:5001';
+    const baseUrl = process.env.BACKEND_URL || `${req.protocol}://${req.get('host')}`;
     const folder = FOLDER_MAP[req.file.mimetype] || 'videos';
     const localUrl = `${baseUrl}/uploads/${folder}/${req.file.filename}`;
     return ApiResponse.created(res, { url: localUrl, key: req.file.filename }, 'File uploaded successfully');
